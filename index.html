@@ -30,48 +30,64 @@
             object-fit: contain;
         }
         
-        /* Mobile touch controls */
-        #mobileControls {
+        /* Top pause button */
+        .topButton {
             display: none;
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 1000;
-            flex-direction: row;
-            gap: 20px;
-        }
-        
-        .touchButton {
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            border-radius: 25px;
+            padding: 8px 20px;
             color: white;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             text-align: center;
-            line-height: 76px;
             user-select: none;
             touch-action: manipulation;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 1001;
+            min-width: 80px;
         }
         
-        .touchButton:active {
+        .topButton:active {
             background: rgba(255, 255, 255, 0.5);
         }
         
-        /* Virtual Joystick Styling */
-        #joystickContainer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Dual joystick mobile controls */
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 0 40px;
+            align-items: flex-end;
         }
         
-        #joystickBase {
+        #leftJoystickContainer,
+        #rightJoystickContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .joystickLabel {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            user-select: none;
+        }
+        
+        /* Virtual Joystick Styling */
+        .joystickBase {
             position: relative;
             width: 100px;
             height: 100px;
@@ -85,7 +101,7 @@
             user-select: none;
         }
         
-        #joystickBase::before {
+        .joystickBase::before {
             content: '';
             position: absolute;
             width: 8px;
@@ -95,7 +111,7 @@
             z-index: 1;
         }
         
-        #joystickKnob {
+        .joystickKnob {
             position: absolute;
             width: 40px;
             height: 40px;
@@ -107,19 +123,33 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         
-        #joystickBase:active {
+        .joystickBase:active {
             background: rgba(255, 255, 255, 0.3);
         }
         
-        #joystickBase:active #joystickKnob {
+        .joystickBase:active .joystickKnob {
             background: rgba(255, 255, 255, 1);
             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Right joystick special styling for shooting */
+        #rightJoystickBase {
+            border-color: rgba(255, 100, 100, 0.7);
+        }
+        
+        #rightJoystickBase:active {
+            background: rgba(255, 100, 100, 0.3);
+            border-color: rgba(255, 100, 100, 1);
         }
         
         /* Mobile detection and orientation */
         @media (max-width: 768px) {
             #mobileControls {
                 display: flex;
+            }
+            
+            .topButton {
+                display: block;
             }
         }
         
@@ -129,65 +159,55 @@
             }
             
             #mobileControls {
-                bottom: 10px;
-                flex-direction: row;
-                width: 95%;
-                justify-content: space-between;
-                align-items: center;
+                bottom: 20px;
+                padding: 0 30px;
             }
             
-            .touchButton {
-                width: 70px;
-                height: 70px;
-                line-height: 66px;
-                font-size: 12px;
-                flex-shrink: 0;
+            .joystickBase {
+                width: 90px;
+                height: 90px;
             }
             
-            #joystickContainer {
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                margin: 0 10px;
+            .joystickKnob {
+                width: 36px;
+                height: 36px;
             }
             
-            #joystickBase {
-                width: 80px;
-                height: 80px;
+            .joystickLabel {
+                font-size: 11px;
             }
             
-            #joystickKnob {
-                width: 32px;
-                height: 32px;
+            .topButton {
+                top: 15px;
+                font-size: 14px;
+                padding: 6px 16px;
             }
         }
         
         @media (orientation: landscape) and (max-width: 768px) {
             #mobileControls {
                 bottom: 15px;
-                right: 20px;
-                left: auto;
-                transform: none;
-                flex-direction: column;
-                gap: 15px;
+                padding: 0 25px;
             }
             
-            .touchButton {
-                width: 60px;
-                height: 60px;
-                line-height: 56px;
-                font-size: 11px;
-                margin: 0;
+            .joystickBase {
+                width: 75px;
+                height: 75px;
             }
             
-            #joystickBase {
-                width: 70px;
-                height: 70px;
+            .joystickKnob {
+                width: 30px;
+                height: 30px;
             }
             
-            #joystickKnob {
-                width: 28px;
-                height: 28px;
+            .joystickLabel {
+                font-size: 10px;
+            }
+            
+            .topButton {
+                top: 10px;
+                font-size: 12px;
+                padding: 4px 12px;
             }
         }
         
@@ -211,14 +231,25 @@
 <body>
     <div id="loadingScreen">Loading...</div>
     <div id="gameContainer"></div>
+    
+    <!-- Pause button at top -->
+    <div id="pauseButton" class="topButton">PAUSE</div>
+    
+    <!-- Dual joystick mobile controls -->
     <div id="mobileControls">
-        <div class="touchButton" id="pauseBtn">PAUSE</div>
-        <div id="joystickContainer">
-            <div id="joystickBase">
-                <div id="joystickKnob"></div>
+        <div id="leftJoystickContainer">
+            <div id="leftJoystickBase" class="joystickBase">
+                <div id="leftJoystickKnob" class="joystickKnob"></div>
             </div>
+            <div class="joystickLabel">MOVE</div>
         </div>
-        <div class="touchButton" id="shootBtn">SHOOT</div>
+        
+        <div id="rightJoystickContainer">
+            <div id="rightJoystickBase" class="joystickBase">
+                <div id="rightJoystickKnob" class="joystickKnob"></div>
+            </div>
+            <div class="joystickLabel">AIM & FIRE</div>
+        </div>
     </div>
     
     <script src="js/phaser.min.js"></script>
