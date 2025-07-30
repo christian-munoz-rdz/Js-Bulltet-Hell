@@ -64,6 +64,58 @@
             background: rgba(255, 255, 255, 0.5);
         }
         
+        /* Virtual Joystick Styling */
+        #joystickContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #joystickBase {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        #joystickBase::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        #joystickKnob {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 1);
+            border-radius: 50%;
+            transition: none;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        #joystickBase:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        #joystickBase:active #joystickKnob {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+        }
+        
         /* Mobile detection and orientation */
         @media (max-width: 768px) {
             #mobileControls {
@@ -79,8 +131,9 @@
             #mobileControls {
                 bottom: 10px;
                 flex-direction: row;
-                width: 90%;
+                width: 95%;
                 justify-content: space-between;
+                align-items: center;
             }
             
             .touchButton {
@@ -88,6 +141,24 @@
                 height: 70px;
                 line-height: 66px;
                 font-size: 12px;
+                flex-shrink: 0;
+            }
+            
+            #joystickContainer {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                margin: 0 10px;
+            }
+            
+            #joystickBase {
+                width: 80px;
+                height: 80px;
+            }
+            
+            #joystickKnob {
+                width: 32px;
+                height: 32px;
             }
         }
         
@@ -98,6 +169,7 @@
                 left: auto;
                 transform: none;
                 flex-direction: column;
+                gap: 15px;
             }
             
             .touchButton {
@@ -105,7 +177,17 @@
                 height: 60px;
                 line-height: 56px;
                 font-size: 11px;
-                margin: 5px 0;
+                margin: 0;
+            }
+            
+            #joystickBase {
+                width: 70px;
+                height: 70px;
+            }
+            
+            #joystickKnob {
+                width: 28px;
+                height: 28px;
             }
         }
         
@@ -131,6 +213,11 @@
     <div id="gameContainer"></div>
     <div id="mobileControls">
         <div class="touchButton" id="pauseBtn">PAUSE</div>
+        <div id="joystickContainer">
+            <div id="joystickBase">
+                <div id="joystickKnob"></div>
+            </div>
+        </div>
         <div class="touchButton" id="shootBtn">SHOOT</div>
     </div>
     

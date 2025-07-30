@@ -125,6 +125,14 @@ let joystickThumb;
 let isDragging = false;
 let pointerStart = { x: 0, y: 0 };
 
+// Joystick variables
+let joystickActive = false;
+let joystickDirection = { x: 0, y: 0 };
+let joystickCenter = { x: 0, y: 0 };
+let joystickRadius = 50;
+let joystickKnobElement;
+let joystickBaseElement;
+
 // Responsive scaling functions
 function getResponsiveValue(baseValue) {
     return Math.max(baseValue * scaleFactor, baseValue * 0.5);
@@ -380,6 +388,8 @@ function setupMobileUI() {
     // Get HTML mobile controls
     const pauseBtn = document.getElementById('pauseBtn');
     const shootBtn = document.getElementById('shootBtn');
+    joystickBaseElement = document.getElementById('joystickBase');
+    joystickKnobElement = document.getElementById('joystickKnob');
 
     if (pauseBtn) {
         pauseBtn.addEventListener('touchstart', (e) => {
@@ -399,6 +409,66 @@ function setupMobileUI() {
             isShooting = false;
         });
     }
+
+    // Setup joystick functionality
+    if (joystickBaseElement && joystickKnobElement) {
+        setupJoystick();
+    }
+}
+
+// Joystick setup and handling
+function setupJoystick() {
+    joystickBaseElement.addEventListener('touchstart', handleJoystickStart, { passive: false });
+    joystickBaseElement.addEventListener('touchmove', handleJoystickMove, { passive: false });
+    joystickBaseElement.addEventListener('touchend', handleJoystickEnd, { passive: false });
+}
+
+function handleJoystickStart(e) {
+    e.preventDefault();
+    joystickActive = true;
+    
+    const rect = joystickBaseElement.getBoundingClientRect();
+    joystickCenter.x = rect.left + rect.width / 2;
+    joystickCenter.y = rect.top + rect.height / 2;
+    joystickRadius = rect.width / 2 - 20; // Account for knob size
+}
+
+function handleJoystickMove(e) {
+    if (!joystickActive) return;
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - joystickCenter.x;
+    const deltaY = touch.clientY - joystickCenter.y;
+    
+    // Calculate distance from center
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Limit movement to joystick radius
+    let normalizedX = deltaX;
+    let normalizedY = deltaY;
+    
+    if (distance > joystickRadius) {
+        normalizedX = (deltaX / distance) * joystickRadius;
+        normalizedY = (deltaY / distance) * joystickRadius;
+    }
+    
+    // Update joystick direction (normalized to -1 to 1)
+    joystickDirection.x = normalizedX / joystickRadius;
+    joystickDirection.y = normalizedY / joystickRadius;
+    
+    // Update knob position
+    joystickKnobElement.style.transform = `translate(${normalizedX}px, ${normalizedY}px)`;
+}
+
+function handleJoystickEnd(e) {
+    e.preventDefault();
+    joystickActive = false;
+    joystickDirection.x = 0;
+    joystickDirection.y = 0;
+    
+    // Reset knob position
+    joystickKnobElement.style.transform = 'translate(0px, 0px)';
 }
 
 // Toggle pause function
@@ -560,22 +630,29 @@ function handleDesktopInput(time) {
 
 // Handle mobile input
 function handleMobileInput(time) {
-    // Mobile shooting - optimized for vertical screens
+    // Mobile shooting - now uses joystick direction
     if (isShooting) {
         if (time > lastFired) {
             let bullet = bullets.get();
             if (bullet) {
                 let targetX, targetY;
                 
-                if (isVertical) {
-                    // For vertical screens, shoot upward by default
-                    // Player is typically at bottom, enemies come from top
-                    targetX = player.x + Phaser.Math.Between(-50, 50); // Slight spread
-                    targetY = player.y - gameHeight * 0.8; // Shoot toward top
+                if (joystickActive && (Math.abs(joystickDirection.x) > 0.1 || Math.abs(joystickDirection.y) > 0.1)) {
+                    // Use joystick direction for shooting
+                    const shootDistance = isVertical ? gameHeight * 0.6 : gameWidth * 0.6;
+                    targetX = player.x + (joystickDirection.x * shootDistance);
+                    targetY = player.y + (joystickDirection.y * shootDistance);
                 } else {
-                    // Landscape - shoot toward center-right
-                    targetX = gameWidth * 0.85;
-                    targetY = gameHeight * 0.3;
+                    // Default shooting direction when joystick is centered or inactive
+                    if (isVertical) {
+                        // For vertical screens, shoot upward by default
+                        targetX = player.x + Phaser.Math.Between(-30, 30); // Slight spread
+                        targetY = player.y - gameHeight * 0.8; // Shoot toward top
+                    } else {
+                        // Landscape - shoot toward center-right
+                        targetX = gameWidth * 0.85;
+                        targetY = gameHeight * 0.3;
+                    }
                 }
                 
                 bullet.fire(player.x, player.y, targetX, targetY);
@@ -711,6 +788,18 @@ function restartGame() {
     invulnerable = false;
     invulnerabilityTime = 0;
     isPaused = false;
+    
+    // Reset mobile controls
+    isShooting = false;
+    isDragging = false;
+    joystickActive = false;
+    joystickDirection.x = 0;
+    joystickDirection.y = 0;
+    
+    // Reset joystick visuals
+    if (joystickKnobElement) {
+        joystickKnobElement.style.transform = 'translate(0px, 0px)';
+    }
     
     this.scene.restart();
 }
